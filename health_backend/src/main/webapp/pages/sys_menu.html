@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- 页面meta -->
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>传智健康</title>
+  <meta name="description" content="传智健康">
+  <meta name="keywords" content="传智健康">
+  <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
+  <!-- 引入样式 -->
+  <!--<link rel="stylesheet" href="../plugins/elementui/index.css">-->
+
+  <!-- 引入样式 -->
+
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <link rel="stylesheet" href="../plugins/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="hold-transition">
+
+<div id="app">
+
+  <div class="content-header">
+    <h1>系统管理
+      <small>菜单管理</small>
+    </h1>
+    <el-breadcrumb separator-class="el-icon-arrow-right" class="breadcrumb">
+      <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+      <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+      <el-breadcrumb-item>菜单管理</el-breadcrumb-item>
+    </el-breadcrumb>
+  </div>
+  <div class="app-container">
+    <div class="box">
+
+      <div class="filter-container">
+        <el-input placeholder="菜单名称" style="width: 200px;" class="filter-item" v-model="pagination.queryString"></el-input>
+        <el-button @click="findPage()" class="dalfBut">查询</el-button>
+        <el-button type="primary" class="butT" @click="handleCreate()">新建菜单</el-button>
+      </div>
+      <div>
+        <el-table :data="tableData" style="width: 100%;margin-bottom: 20px;" row-key="id" border
+                  :tree-props="{children: 'children', hasChildren: 'hasChildren'}">
+          <el-table-column prop="name" label="菜单名称" width="220"></el-table-column>
+          <el-table-column prop="linkUrl" label="访问路径" width="220"></el-table-column>
+          <el-table-column prop="path" label="路径级别" width="220"></el-table-column>
+          <el-table-column prop="parentMenuId" label="自关联Id" width="220"></el-table-column>
+          <el-table-column prop="priority" label="菜单级别" width="220"></el-table-column>
+          <el-table-column label="操作" align="center">
+            <template slot-scope="scope">
+              <el-button type="primary" size="mini" @click="handleUpdate(scope.row.id)">修改</el-button>
+              <el-button type="danger" size="mini" @click="handleDelete(scope.row.id)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+      <el-pagination class="pagiantion" @current-change="handleCurrentChange" :current-page="pagination.currentPage" :page-size="pagination.pageSize"
+                     layout="total, prev, pager, next, jumper" :total="pagination.total"></el-pagination>
+      <div class="add-form">
+        <el-dialog title="新建菜单" :visible.sync="dialogFormVisible">
+          <el-form ref="dataAddForm" :model="user" label-position="right" label-width="100px">
+            <el-row>
+              <el-col :span="22">
+                <el-form-item label="父菜单" prop="parentMenuId">
+                  <el-select v-model="user.parentMenuId">
+                    <el-option :label="item.name" :value="item.id" :key="item.id" v-for="item in parentMenuDate"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="22">
+                <el-form-item label="菜单名称" prop="name">
+                  <el-input v-model="user.name" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="22">
+                <el-form-item label="链接路径" prop="linkUrl">
+                  <el-input v-model="user.linkUrl" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="22">
+                <el-form-item label="优先级" prop="icon">
+                  <el-input type="number" v-model="user.priority" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="22">
+                <el-form-item label="图标">
+                  <el-input v-model="user.icon"></el-input>
+                </el-form-item>
+              </el-col>
+
+            </el-row>
+            <el-row>
+              <el-col :span="22">
+                <el-form-item label="备注">
+                  <el-input v-model="user.remark" type="textarea"></el-input>
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisible = false">取消</el-button>
+            <el-button type="primary" @click="addUser()">确定</el-button>
+          </div>
+        </el-dialog>
+      </div>
+      <div class="edit-form">
+        <el-dialog title="编辑菜单" :visible.sync="dialogFormVisible4Edit">
+          <el-form ref="dataEditForm" :model="user" label-position="right" label-width="100px">
+            <el-row>
+              <el-col :span="22">
+                <el-form-item label="父菜单" prop="parentMenuId" v-if="user.id && user.parentMenuId">
+                  <el-select v-model="user.parentMenuId">
+                    <el-option :label="item.name" :value="item.id" :key="item.id" v-for="item in parentMenuDate"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="22">
+                <el-form-item label="菜单名称" prop="name">
+                  <el-input v-model="user.name" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="22">
+                <el-form-item label="链接路径" prop="linkUrl">
+                  <el-input v-model="user.linkUrl" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="22">
+                <el-form-item label="优先级" prop="icon">
+                  <el-input type="number" v-model="user.priority" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="22">
+                <el-form-item label="图标">
+                  <el-input v-model="user.icon"></el-input>
+                </el-form-item>
+              </el-col>
+
+            </el-row>
+            <el-row>
+              <el-col :span="22">
+                <el-form-item label="备注">
+                  <el-input v-model="user.remark" type="textarea"></el-input>
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisible4Edit = false">取消</el-button>
+            <el-button type="primary" @click="editUser()">确定</el-button>
+          </div>
+        </el-dialog>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+</body>
+<!-- 引入组件库 -->
+<script src="../js/vue.js"></script>
+<!--<script src="../plugins/elementui/index.js"></script>-->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script src="../js/axios-0.18.0.js"></script>
+<script>
+  var app = new Vue({
+    el: '#app',
+    data: {
+      pagination: {//分页相关模型数据
+        currentPage: 1,//当前页码
+        pageSize: 10,//每页显示的记录数
+        total: 0,//总记录数
+        queryString: null//查询条件
+      },
+
+      parentMenuDate:[],
+      list: [],
+      user: {},
+      dialogFormVisible: false,
+      dialogFormVisible4Edit: false,
+      roleList: [],
+      roleIds: [],
+      username: [],
+      tableData: []
+    },
+    mounted () {
+        axios.get("/menu/findParentMenu.do").then((res)=>{
+            this.parentMenuDate = res.data.data;
+           console.log(this.parentMenuDate);
+        });
+      this.findPage()
+    },
+
+    methods: {
+        //弹出编辑窗口
+      handleUpdate (id) {
+        this.dialogFormVisible4Edit = true;
+          //发送请求回显数据
+          axios.get("/menu/findById.do?id="+id).then((res)=>{
+              if (res.data.flag){
+                  this.user.id = id;
+                  this.user.parentMenuId = res.data.data.parentMenuId;
+                  this.user.name = res.data.data.name;
+                  this.user.linkUrl = res.data.data.linkUrl;
+                  this.user.priority = res.data.data.priority;
+                  this.user.icon = res.data.data.icon;
+                  this.user.remark = res.data.data.remark;
+                  //发送请求回显父菜单
+                  console.log(this.user)
+
+              } else {
+                  this.$message.error(res.data.message);
+              }
+          });
+      },
+        //重置表单
+        resetForm() {
+            this.user={};
+        },
+        //弹出新建窗口
+      handleCreate () {
+        this.dialogFormVisible = true;
+        this.resetForm();
+      },
+        //新增
+      addUser () {
+          //发送请求添加数据
+          axios.post("/menu/add.do",this.user).then((res)=>{
+              this.dialogFormVisible = false;
+              if (res.data.flag){
+                  this.$message({
+                      message:res.data.message,
+                      type:'success'
+                  });
+              }else {
+                  this.message.error(res.data.message);
+              }
+          }).finally(()=>{
+              this.findPage();
+          })
+
+      },
+        //删除
+        handleDelete(id){
+            //防止误删提示框
+            this.$confirm("确认删除当前选中的菜单信息吗？","提示",
+                {type:'warning'}).then(()=>{
+                //点击确认执行的操作
+                axios.get("/menu/delete.do?id="+id).then((res)=>{
+                    if (res.data.flag){
+                        //删除成功
+                        this.$message({
+                            message:res.data.message,
+                            type:'success'
+                        });
+                    } else {
+                        this.$message.error(res.data.message);
+                    }
+                }).finally(()=>{
+                    this.findPage();
+                })
+            });
+
+        },
+        //编辑提交
+        editUser () {
+            axios.post("/menu/edit.do",this.user).then((res)=>{
+                this.dialogFormVisible4Edit = false;
+                if (res.data.flag){
+                    this.$message({
+                        message:res.data.message,
+                        type:'success'
+                    });
+                }else {
+                    this.message.error(res.data.message);
+                }
+            }).finally(()=>{
+                this.findPage();
+            })
+      },
+      //分页查询
+      findPage () {
+        //封装分页请求参数
+        var param = {
+           currentPage: this.pagination.currentPage, //当前页
+         pageSize: this.pagination.pageSize,      //每页显示的记录数
+           queryString: this.pagination.queryString //查询的条件
+         };
+         axios.post('/menu/findPage.do', param).then((res) => {
+             this.tableData=res.data.rows;
+             this.pagination.total=res.data.total;
+         })
+      },
+      handleCurrentChange (currentPage) {
+          this.pagination.currentPage = currentPage;
+          this.findPage();
+      },
+    }
+  })
+</script>
+</html>

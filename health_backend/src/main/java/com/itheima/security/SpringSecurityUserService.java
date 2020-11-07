@@ -1,11 +1,13 @@
 package com.itheima.security;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.itheima.pojo.Menu;
 import com.itheima.pojo.Permission;
 import com.itheima.pojo.Role;
 import com.itheima.pojo.User;
 import com.itheima.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,19 +19,25 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Component
 public class SpringSecurityUserService implements UserDetailsService {
     @Reference
     private UserService userService;
     @Autowired
+    @Qualifier
     private BCryptPasswordEncoder passwordEncoder;
     //根据用户名查询用户信息
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
+
         System.out.println("输入的用户名"+username);
         //远程调用用户服务信息，根据用户名查询用户信息
         User user = userService.findByUsername(username);
+
         String password = user.getPassword();
         System.out.println("查询的密码"+password);
         String encode = passwordEncoder.encode(password);

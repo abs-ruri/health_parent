@@ -14,4 +14,61 @@ WHERE
 p.id = rp.permission_id AND rp.role_id = #{roleId}
     </select>
 
+<select id="findAllpermission" resultType="com.itheima.pojo.Permission">
+    SELECT * FROM t_permission;
+</select>
+
+    <select id="findPermissionById" parameterType="int" resultType="int">
+SELECT
+p.id
+FROM
+t_role_permission rp,
+t_permission p
+WHERE
+p.id = rp.permission_id AND rp.role_id = #{id}
+
+    </select>
+
+    <select id="findPage" parameterType="string" resultType="com.itheima.pojo.Permission">
+        select * from t_permission
+        <if test="value !=null and value.length>0">
+            where name=#{name}
+        </if>
+    </select>
+
+    <insert id="add" parameterType="com.itheima.pojo.Permission">
+            <selectKey resultType="int" order="AFTER" keyProperty="id">
+                select LAST_INSERT_ID()
+            </selectKey>
+            insert into t_permission (name,keyword,description)
+            values
+            (#{name},#{keyword},#{description})
+
+    </insert>
+
+    <select id="findAll" parameterType="int" resultType="com.itheima.pojo.Permission">
+        select * from t_permission where id=#{id}
+    </select>
+
+    <update id="edit" parameterType="com.itheima.pojo.Permission">
+        update t_permission
+        <set>
+            <if test="name != null">
+                name = #{name},
+            </if>
+
+            <if test="keyword != null">
+                keyword = #{keyword},
+            </if>
+
+            <if test="description != null">
+                description = #{description},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="int">
+       DELETE FROM t_permission WHERE id=#{id}
+    </delete>
 </mapper>

@@ -3,6 +3,9 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.itheima.dao.RoleDao" >
 
+
+
+
     <select id="findByUserId" parameterType="int" resultType="com.itheima.pojo.Role">
 SELECT
 r.*
@@ -13,4 +16,75 @@ WHERE
 r.id = ur.role_id AND ur.user_id =#{userId}
     </select>
 
+    <select id="findAll" resultType="com.itheima.pojo.Role">
+        SELECT * FROM t_role;
+    </select>
+
+    <insert id="addRole" parameterType="com.itheima.pojo.Role">
+        <selectKey resultType="int" order="AFTER" keyProperty="id">
+            select LAST_INSERT_ID()
+        </selectKey>
+        insert into t_role (name,keyword,description)
+        values
+        (#{name},#{keyword},#{description})
+    </insert>
+
+    <!--设置和permission的关联关系-->
+    <insert id="setRelation" parameterType="map">
+        insert into t_role_permission(role_id,permission_id)
+        values
+         (#{roleId},#{permissionId})
+    </insert>
+
+
+    <!--设置和menu的关系-->
+    <insert id="setRelationMenu" parameterType="map">
+        insert into t_role_menu(role_id,menu_id)
+        values
+         (#{roleId},#{menuId})
+    </insert>
+
+    <!--根据id查询role-->
+    <select id="findRoleById" parameterType="int" resultType="com.itheima.pojo.Role">
+        SELECT * FROM t_role WHERE id = #{id}
+    </select>
+
+    <update id="EditRole" parameterType="com.itheima.pojo.Role">
+        update t_role
+        <set>
+            <if test="name != null">
+                name = #{name},
+            </if>
+
+            <if test="keyword != null">
+                keyword = #{keyword},
+            </if>
+
+            <if test="description != null">
+                description = #{description},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+
+    <select id="findPage" resultType="com.itheima.pojo.Role" parameterType="string">
+        select * from t_role where name =#{queryString}
+    </select>
+
+
+<!--删除role和permission的关系-->
+    <delete id="deleteRoleAndPermission" parameterType="int">
+        DELETE FROM t_role_permission WHERE role_id = #{roleId}
+    </delete>
+
+    <!--删除role和menu的关系-->
+    <delete id="deleteRoleAndMenu" parameterType="int">
+        DELETE FROM t_role_menu WHERE role_id = #{roleId}
+    </delete>
+
+    <!--删除role-->
+    <delete id="deleteById" parameterType="int">
+          DELETE FROM t_role WHERE id = #{id}
+    </delete>
 </mapper>

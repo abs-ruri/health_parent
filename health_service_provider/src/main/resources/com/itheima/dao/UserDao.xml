@@ -7,4 +7,105 @@
        SELECT * FROM t_user WHERE username =#{username}
     </select>
 
+
+    <!--新增-->
+    <insert id="add" parameterType="com.itheima.pojo.User">
+        <!--mybatis的方法返回最近一次插入操作的自增主键id-->
+        <selectKey resultType="integer" order="AFTER" keyProperty="id">
+            select LAST_INSERT_ID()
+        </selectKey>
+        insert into t_user (birthday,gender,username,password,remark,station,telephone)
+        values
+        (#{birthday},#{gender},#{username},#{password},#{remark},#{station},#{telephone})
+    </insert>
+    <!--用户角色中间表添加数据-->
+    <insert id="setUserAndRole" parameterType="map">
+        insert into t_user_role (user_id,role_id) values (#{userId},#{roleId})
+    </insert>
+
+    <!--编辑用户表-->
+    <update id="edit" parameterType="com.itheima.pojo.User">
+        update t_user
+        <set>
+            <if test="birthday != null">
+                birthday = #{birthday},
+            </if>
+            <if test="gender != null">
+                gender = #{gender},
+            </if>
+            <if test="username != null">
+                username = #{username},
+            </if>
+            <if test="password != null">
+                password = #{password},
+            </if>
+            <if test="remark != null">
+                remark = #{remark},
+            </if>
+            <if test="station != null">
+                station = #{station},
+            </if>
+            <if test="telephone != null">
+                telephone = #{telephone},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--根据用户id删除其和角色中间关系表-->
+    <delete id="deleteRoleIdByUserId">
+        delete from t_user_role where user_id = #{userId};
+    </delete>
+    <!--删除-->
+    <delete id="delete">
+        delete from t_user where id = #{id};
+    </delete>
+
+
+    <!--分页查询（按条件）-->
+    <select id="findByCondition" parameterType="string" resultType="com.itheima.pojo.User">
+        SELECT * FROM t_user
+        <if test="value != null and value.length > 0">
+            WHERE username = #{value}
+        </if>
+    </select>
+
+    <!--根据id查询用户-->
+    <select id="findById" resultType="com.itheima.pojo.User">
+        select * FROM t_user where id = #{id}
+    </select>
+
+    <!--根据id查询用户相关角色id-->
+    <select id="findRoleIdsByUserId"  resultType="java.lang.Integer">
+        select role_id from t_user_role where user_id = #{id}
+    </select>
+
+
+
+
+    <!--查询role-->
+    <select id="findUserRoleById" parameterType="int" resultType="com.itheima.pojo.Role">
+          SELECT * FROM t_role WHERE id=#{roleId}
+    </select>
+
+    <!--查询用户id-->
+    <select id="findUserId" parameterType="string" resultType="int">
+        SELECT t.id FROM t_user t WHERE username = #{username}
+    </select>
+
+    <select id="findMenuIdByRoleId" parameterType="int" resultType="int">
+      SELECT  menu_id FROM t_role_menu WHERE role_id=#{roleId}
+    </select>
+
+    <select id="findMenu" parameterType="int" resultType="com.itheima.pojo.Menu">
+SELECT * FROM t_menu WHERE id=#{integer}
+    </select>
+
+    <select id="findMenuIdList"  resultType="com.itheima.pojo.Menu" parameterType="int">
+        select  * from t_menu where id = #{integer} and parentMenuId IS NULL;
+    </select>
+
+
+
+
 </mapper>

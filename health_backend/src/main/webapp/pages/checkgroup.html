@@ -306,6 +306,7 @@
                     axios.post("/checkgroup/add.do?checkitemIds=" + this.checkitemIds,this.formData).then((res) => {
                         //关闭新增窗口
                         this.dialogFormVisible = false;
+
                         if(res.data.flag){
                             //操作成功
                             this.$message({
