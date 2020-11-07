@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itheima.dao.MenuDao">
+
+
+    <select id="findAllmenu" resultType="com.itheima.pojo.Menu">
+        SELECT * FROM t_menu;
+    </select>
+
+    <select id="findMenuById" parameterType="int" resultType="int">
+SELECT
+m.id
+FROM
+t_role_menu rm,
+t_menu m
+WHERE
+rm.role_id = #{id} AND rm.menu_id = m.id
+</select>
+
+
+
+    <!--新增-->
+    <insert id="add">
+        insert into t_menu (name,linkUrl,path,priority,icon,description,parentMenuId,level)
+        values
+        (#{name},#{linkUrl},#{path},#{priority},#{icon},#{description},#{parentMenuId},2)
+    </insert>
+
+    <!--修改-->
+    <update id="edit">
+        update t_menu
+        <set>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="linkUrl != null">
+                linkUrl = #{linkUrl},
+            </if>
+            <if test="path != null">
+                path = #{path},
+            </if>
+            <if test="priority != null">
+                priority = #{priority},
+            </if>
+            <if test="icon != null">
+                icon = #{icon},
+            </if>
+            <if test="parentMenuId != null">
+                parentMenuId = #{parentMenuId},
+            </if>
+            <if test="description != null">
+                description = #{description},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--删除中间关系表-->
+    <delete id="deleteRoleAndMenu">
+        delete  from t_role_menu where menu_id=#{id}
+    </delete>
+    <!--删除菜单表-->
+    <delete id="delete">
+        delete  from t_menu where id=#{id}
+    </delete>
+
+    <!--分页查询-->
+    <select id="findByCondition" resultType="com.itheima.pojo.Menu">
+        SELECT * FROM t_menu where parentMenuId IS NULL
+        <if test="value != null and value.length > 0">
+            and name = #{value}
+        </if>
+
+    </select>
+
+    <!--根据父id查询子节点-->
+    <select id="findByParentMenuId" resultType="com.itheima.pojo.Menu">
+        select * from t_menu where parentMenuId = #{id}
+    </select>
+
+    <!--查询父菜单-->
+    <select id="findParentMenu" resultType="com.itheima.pojo.Menu">
+        SELECT * FROM t_menu where parentMenuId IS NULL
+    </select>
+
+    <!--根据id查询-->
+    <select id="findById" resultType="com.itheima.pojo.Menu">
+        select * from t_menu where id = #{id}
+    </select>
+
+    <!--查询指定菜单id是否关联role表-->
+    <select id="findRoleIdByMenuId" resultType="java.lang.Long">
+        select count(*) from t_role_menu where menu_id = #{id}
+    </select>
+
+    <!--根据角色id去查询菜单-->
+    <select id="findByRoleId" resultType="com.itheima.pojo.Menu">
+        select m.* from t_menu m,t_role_menu rm where m.id = rm.menu_id and rm.role_id =#{id} and parentMenuId IS NULL
+    </select>
+
+</mapper>
